@@ -6,7 +6,7 @@ import json
 from scrapers import site1_scraper  # Import your scraper modules
 from scrapers import site2_scraper  # Import your scraper modules
 
-json_scraper_list = [site1_scraper, site2_scraper]
+#json_scraper_list = [site1_scraper, site2_scraper]
 csv_scraper_list = [site1_scraper, site2_scraper]
 
 producer1 = KafkaProducer(

@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quotes</title>
+</head>
+<body>
+    <h1>Scraped Quotes</h1>
+    <ul>
+        {% for quote in quotes %}
+            <li>"{{ quote.text }}" - {{ quote.author }} [{{ quote.tags }}]</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
+

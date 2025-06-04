@@ -1,0 +1,10 @@
+kafka-python 
+SQLAlchemy 
+pymysql 
+beautifulsoup4 
+chromedriver 
+kafka-python 
+pandas 
+requests 
+schedule 
+selenium

@@ -5,7 +5,7 @@ from confluent_kafka import Consumer, KafkaError
 c = Consumer({
     'bootstrap.servers': 'localhost:9091',
     'group.id': 'counting-group',
-    'client.id': 'client-1',
+    'client.id': 'sql-db-consumer-1',
     'enable.auto.commit': True,
     'session.timeout.ms': 6000,
     'default.topic.config': {'auto.offset.reset': 'smallest'}
