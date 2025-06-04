@@ -1,10 +1,8 @@
-from kafka import KafkaConsumer
+from confluent_kafka import Consumer, KafkaError
 import json
 import time
+from sqlalchemy.exc import SQLAlchemyError
 from models import Session, Quote
-
-###remember json.loads(value_str) >>> will load json string to python
-# object
 
 def run_consumer():
 
@@ -24,52 +22,42 @@ def run_consumer():
     db_consumer.subscribe([topic])
     print(f"{time.ctime()} Consumer started.")
 
-###!!!
-    session = Session()
-
-###???put on schedule to start at 11:59 or timeout after certain time
     try:
         while(True):
             msg = db_consumer.poll(10.0)
             if msg is None:
                 print("Waiting...")
+            
             elif msg.error():
-                print(f"Consumer error: {msg.error()}")
+                error_message = f"{time.ctime()}: ❌ Consumer error: {msg.error()}\n"
+                print(error_message)
+                with open("consumer_errors.log", "a") as error_log:
+                    error_log.write(error_message)
                 continue
+
 
             value = msg.value().decode('utf-8')
             data = json.loads(value)
 
             if data.get("type") == "done":
                 print("✅ Done message received. Shutting down consumer.")
-                break  # exit the loop and shut down
+                break
             else:
-                print(f"Consumed event: {data}")
+                # Isolating each DB write to its own transaction/session
+                try:
+                    with Session() as session:
+                        quote = Quote(text=data['text'], author=data['author'], tags=",".join(data['tags']))
+                        session.add(quote)
+                        session.commit()
+                        print(f"✅ Consumed and inserted event: {data}")
+                
+                except SQLAlchemyError as e:
+                    error_message = f"{time.ctime()}: ❌ Database error: {e}\n"
+                    print(error_message)
 
+                    with open("consumer_db_errors.log", "a") as error_log:
+                        error_log.write(error_message)
 
-        # for message in json_consumer:
-        #     #if no message in csv_comsumer, wait(10 seconds) try again and then continue
-        #     #continue if need to retry loop if the retry is unsuccess (maybe break) 
-        #     json_data = message.value
-        #     # data = json_pandas(json_data) fn back to here?
-        #     quote = Quote(text=data['text'], author=data['author'], tags=",".join(data['tags']))
-        #     session.add(quote)
-        #     session.commit()
-
-            for message in db_consumer:
-        #if no message in csv_comsumer, wait(10 seconds) try again and then continue
-        #continue if need to retry loop if the retry is unsuccess (maybe break) 
-                csv_data = message.value
-
-                csv_to_db_pandas(csv_data) 
-       
-       
-        #data = csv_to_db_pandas(csv_data) fn back to here?
-        #quote = Quote(text=data['text'], author=data['author'], tags=",".join(data['tags']))
-        #session.add(quote)
-        #session.commit()
-
-        ###???should this go above db stuff?
     except KeyboardInterrupt:
         pass
     finally:

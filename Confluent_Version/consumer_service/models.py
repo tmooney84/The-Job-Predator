@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-engine = create_engine('mysql+mysqlconnector://root:UDFB8488@mysql:3306/quotes_db')
+engine = create_engine('mysql+mysqlconnector://root:password@mysql:3306/quotes_db')
 Session = sessionmaker(bind=engine)
 Base = declarative_base()
 
