@@ -83,9 +83,9 @@ services:
   scraper_orchestrator:
     build:
       context: ./scraper_orchestrator
-   # container_name: scraper_orchestrator
-   # volumes:
-   #   - ./scraper_orchestrator:/app
+    container_name: scraper_orchestrator
+    volumes:
+      - ./scraper_orchestrator:/app
     depends_on:
       - kafka1
     command: python3 orchestrator.py
@@ -94,8 +94,8 @@ services:
     build:
       context: ./consumer_service
     container_name: consumer_service
-    #volumes:
-    #  - ./consumer_service:/app
+    volumes:
+      - ./consumer_service:/app
     depends_on:
       - kafka1
     command: python3 consumer.py

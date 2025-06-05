@@ -52,7 +52,6 @@ def run_all_scrapers():
     
     producer.flush()
 
-schedule.every().day.at("00:00").do(run_consumer)
 schedule.every().day.at("00:00").do(run_all_scrapers)
 
 if __name__ == "__main__":
