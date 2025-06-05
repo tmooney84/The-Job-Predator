@@ -8,6 +8,9 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Copy the models into the image
+COPY ../models /app/models
+
 # Copy the app code
 COPY . .
 

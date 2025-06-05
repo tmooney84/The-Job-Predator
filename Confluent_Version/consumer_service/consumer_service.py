@@ -2,7 +2,7 @@ from confluent_kafka import Consumer, KafkaError
 import json
 import time
 from sqlalchemy.exc import SQLAlchemyError
-from models import Session, Quote
+from models.models import Session, Quote
 
 def run_consumer():
 

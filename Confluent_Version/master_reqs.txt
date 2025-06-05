@@ -1,10 +1,10 @@
-kafka-python 
-SQLAlchemy 
-pymysql 
 beautifulsoup4 
 chromedriver 
-kafka-python 
+confluent-kafka
 pandas 
+pymysql 
 requests 
 schedule 
 selenium
+SQLAlchemy
+Flask 

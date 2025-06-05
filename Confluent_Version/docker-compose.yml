@@ -69,30 +69,37 @@ services:
       - kafka2
       - kafka3
 
-
-
   mysql:
     image: mysql:8.0
-    environment:
-      MYSQL_ROOT_PASSWORD: password 
-      MYSQL_DATABASE: quotes_db
-      MYSQL_USER: root
-      MYSQL_PASSWORD: password 
+    container_name: mysql
     ports:
-      - "3306:3306"
+      - "3306:3306"           # Need to make sure no other instances of mysql running 
+    environment:
+      MYSQL_ROOT_PASSWORD: UDFB8488 
+      MYSQL_DATABASE: quotes_db
     volumes:
       - mysql_data:/var/lib/mysql
 
   scraper_orchestrator:
-    build: ./scraper_orchestrator
+    build:
+      context: ./scraper_orchestrator
+   # container_name: scraper_orchestrator
+   # volumes:
+   #   - ./scraper_orchestrator:/app
     depends_on:
-      - kafka
+      - kafka1
+    command: python3 orchestrator.py
 
   consumer_service:
-    build: ./consumer_service
+    build:
+      context: ./consumer_service
+    container_name: consumer_service
+    #volumes:
+    #  - ./consumer_service:/app
     depends_on:
-      - kafka
-      - mysql
+      - kafka1
+    command: python3 consumer.py
+
 
   frontend:
     build: ./frontend
@@ -100,6 +107,8 @@ services:
       - "5000:5000"
     depends_on:
       - mysql
+    #environment:
+    #  - DATABASE_URL=mysql+pymysql://user:UDFB8488@mysql:3306/quotes_db
 
 volumes:
   mysql_data:
