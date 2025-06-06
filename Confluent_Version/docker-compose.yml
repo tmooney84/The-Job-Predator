@@ -88,8 +88,7 @@ services:
       context: ../Confluent_Version
       dockerfile: scraper_orchestrator/Dockerfile
     container_name: scraper_orchestrator
-    volumes:
-      - ./scraper_orchestrator:/app
+
     depends_on:
       - kafka1
 
@@ -99,11 +98,10 @@ services:
       context: ..
       dockerfile: Confluent_Version/consumer_service/Dockerfile
     container_name: consumer_service
-    volumes:
-      - ./consumer_service:/app
     depends_on:
       - kafka1
-
+    environment:
+      - DATABASE_URL=mysql://dev:Qwasar_2025!@mysqldb:3306/quotes_db
 
   frontend:
     build:

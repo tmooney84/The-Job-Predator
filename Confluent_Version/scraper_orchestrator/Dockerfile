@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 
-WORKDIR /app
+WORKDIR /app/scraper_orchestrator/
 
 # Install system dependencies
 RUN apt-get update && \
@@ -24,6 +24,6 @@ RUN cat requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the entire scraper_orchestrator folder
-COPY scraper_orchestrator/ /app
+COPY scraper_orchestrator/ /app/scraper_orchestrator
 
 CMD ["python3", "publisher_service.py"]
