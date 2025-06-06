@@ -1,10 +1,24 @@
 from confluent_kafka import Consumer, KafkaError
 import json
 import time
+from sqlalchemy import create_engine, Column, String, Text, Enum, Integer, CHAR
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.exc import SQLAlchemyError
-from models.models import Session, Quote
+from models.models import Quote
+import os
+
 
 def run_consumer():
+    DATABASE_URL = os.environ["DATABASE_URL"]
+    engine = create_engine(DATABASE_URL, echo=True)
+    
+    # Create an engine
+    engine = create_engine(DATABASE_URL, echo=True)
+
+    # Create tables
+    Base.metadata.create_all(engine)
+
 
     dbq_config = {
         'bootstrap.servers': 'kafka1:9091', # minimum need
