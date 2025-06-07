@@ -30,7 +30,7 @@ services:
       - kafka_net
     command: sh -c "sleep 5 && python3 publisher_service.py"
 
-  consumer_service: 
+  consumer_service:
     build:
       context: ..
       dockerfile: Confluent_Version/consumer_service/Dockerfile
@@ -88,7 +88,7 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
       KAFKA_BROKER_ID: 1
     volumes:
-        - ./data/kafka1/data:/var/lib/kafka/data
+      - ./data/kafka1/data:/var/lib/kafka/data
     depends_on:
       - zookeeper
     networks:
@@ -114,7 +114,7 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
       KAFKA_BROKER_ID: 2
     volumes:
-        - ./data/kafka2/data:/var/lib/kafka/data
+      - ./data/kafka2/data:/var/lib/kafka/data
     depends_on:
       - zookeeper
     networks:
@@ -140,7 +140,7 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
       KAFKA_BROKER_ID: 3
     volumes:
-        - ./data/kafka3/data:/var/lib/kafka/data
+      - ./data/kafka3/data:/var/lib/kafka/data
     depends_on:
       - zookeeper
     networks:
@@ -167,6 +167,9 @@ volumes:
   zookeeper_data:
   zookeeper_datalog:
   mysql_data:
+  kafka1_data:
+  kafka2_data:
+  kafka3_data:
 
 networks:
   kafka_net:
