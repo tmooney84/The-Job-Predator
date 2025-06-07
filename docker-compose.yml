@@ -1,0 +1,144 @@
+version: '3'
+services:
+  zookeeper:
+    image: bitnami/zookeeper:latest
+    hostname: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOO_MY_ID: 1
+      ZOO_PORT: 2181
+      ZOO_SERVERS: server.1=zookeeper:2888:3888
+      ALLOW_ANONYMOUS_LOGIN: yes
+    volumes:
+      - ./data/zookeeper/data:/data
+      - ./data/zookeeper/datalog:/datalog
+
+  kafka1:
+    image: bitnami/kafka:3.5.1-debian-11-r25
+    hostname: kafka1
+    ports:
+      - "9091:9091"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_CFG_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_CFG_LISTENERS: LISTENER_DOCKER_INTERNAL://:19091,LISTENER_DOCKER_EXTERNAL://:9091
+      KAFKA_CFG_ADVERTISED_LISTENERS: LISTENER_DOCKER_INTERNAL://kafka1:19091,LISTENER_DOCKER_EXTERNAL://localhost:9091
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: LISTENER_DOCKER_INTERNAL:PLAINTEXT,LISTENER_DOCKER_EXTERNAL:PLAINTEXT
+      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: LISTENER_DOCKER_INTERNAL
+      KAFKA_CFG_KRAFT_MODE: "false"
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+      KAFKA_ENABLE_KRAFT: "no"
+    volumes:
+      - ./data/kafka1:/bitnami/kafka
+    depends_on:
+      - zookeeper
+    healthcheck:
+      test: ["CMD", "kafka-topics.sh", "--bootstrap-server", "localhost:19091", "--list"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  kafka2:
+    image: bitnami/kafka:3.5.1-debian-11-r25
+    hostname: kafka2
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 2
+      KAFKA_CFG_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_CFG_LISTENERS: LISTENER_DOCKER_INTERNAL://:19092,LISTENER_DOCKER_EXTERNAL://:9092
+      KAFKA_CFG_ADVERTISED_LISTENERS: LISTENER_DOCKER_INTERNAL://kafka2:19092,LISTENER_DOCKER_EXTERNAL://localhost:9092
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: LISTENER_DOCKER_INTERNAL:PLAINTEXT,LISTENER_DOCKER_EXTERNAL:PLAINTEXT
+      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: LISTENER_DOCKER_INTERNAL
+      KAFKA_CFG_KRAFT_MODE: "false"
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+      KAFKA_ENABLE_KRAFT: "no"
+    volumes:
+      - ./data/kafka2:/bitnami/kafka
+    depends_on:
+      - zookeeper
+    healthcheck:
+      test: ["CMD", "kafka-topics.sh", "--bootstrap-server", "localhost:19091", "--list"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  kafka3:
+    image: bitnami/kafka:3.5.1-debian-11-r25
+    hostname: kafka3
+    ports:
+      - "9093:9093"
+    environment:
+      KAFKA_BROKER_ID: 3
+      KAFKA_CFG_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_CFG_LISTENERS: LISTENER_DOCKER_INTERNAL://:19093,LISTENER_DOCKER_EXTERNAL://:9093
+      KAFKA_CFG_ADVERTISED_LISTENERS: LISTENER_DOCKER_INTERNAL://kafka3:19093,LISTENER_DOCKER_EXTERNAL://localhost:9093
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: LISTENER_DOCKER_INTERNAL:PLAINTEXT,LISTENER_DOCKER_EXTERNAL:PLAINTEXT
+      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: LISTENER_DOCKER_INTERNAL
+      KAFKA_CFG_KRAFT_MODE: "false"
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+      KAFKA_ENABLE_KRAFT: "no"
+    volumes:
+      - ./data/kafka3:/bitnami/kafka
+    depends_on:
+      - zookeeper
+    healthcheck:
+      test: ["CMD", "kafka-topics.sh", "--bootstrap-server", "localhost:19091", "--list"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  kafdrop:
+    image: obsidiandynamics/kafdrop
+    restart: "no"
+    ports:
+      - "9000:9000"
+    environment:
+      KAFKA_BROKERCONNECT: "kafka1:9091"
+    depends_on:
+      - kafka1
+      - kafka2
+      - kafka3
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    restart: always
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: Qw@$4r00+!
+      MYSQL_DATABASE: quotes_db
+      MYSQL_USER: dev
+      MYSQL_PASSWORD: Qwasar_2025!
+
+  scraper_orchestrator:
+    build:
+      context: ../Confluent_Version
+      dockerfile: scraper_orchestrator/Dockerfile
+    container_name: scraper_orchestrator
+    depends_on:
+      - kafka1
+
+  consumer_service:
+    build:
+      context: ..
+      dockerfile: Confluent_Version/consumer_service/Dockerfile
+    container_name: consumer_service
+    depends_on:
+      - kafka1
+    environment:
+      - DATABASE_URL=mysql://dev:Qwasar_2025!@mysql:3306/quotes_db
+
+  frontend:
+    build:
+      context: ..
+      dockerfile: Confluent_Version/frontend/Dockerfile
+    container_name: frontend
+    ports:
+      - "6300:6300"
+    depends_on:
+      - mysql
+    environment:
+      - DATABASE_URL=mysql://dev:Qwasar_2025!@mysql:3306/quotes_db
+
+volumes:
+  mysql_data:

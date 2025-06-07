@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS quotes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    text TEXT NOT NULL,
+    author VARCHAR(255),
+    tags VARCHAR(255)
+);

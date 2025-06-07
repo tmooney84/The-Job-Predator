@@ -26,4 +26,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the entire scraper_orchestrator folder
 COPY scraper_orchestrator/ /app/scraper_orchestrator
 
+#CMD ["python3", "publisher_main.py"]
 CMD ["python3", "publisher_service.py"]

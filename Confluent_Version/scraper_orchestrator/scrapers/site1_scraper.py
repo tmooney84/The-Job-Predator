@@ -10,11 +10,19 @@ def scrape():
     # Comment out headless for testing:
     # options.add_argument('--headless')
 
-    service = Service()  # assumes chromedriver is in PATH
+    # service = Service()  # assumes chromedriver is in PATH
     # driver = webdriver.Chrome(service=service, options=options)
     driver = webdriver.Chrome()
 
+    url = "http://quotes.toscrape.com"
+    driver.get(url)
 
+    WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.CLASS_NAME, "quote"))
+    )
+
+    soup = BeautifulSoup(driver.page_source, 'html.parser')
+    
     url = "http://quotes.toscrape.com"
     driver.get(url)
 
@@ -42,5 +50,4 @@ def scrape():
     return results
 
 if __name__ == "__main__":
-    for quote in scrape():
-        print(quote)
+    scrape()

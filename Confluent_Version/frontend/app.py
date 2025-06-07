@@ -1,16 +1,16 @@
 from flask import Flask, render_template
-from models.models import Quote, Session, Engine
+from sqlalchemy.orm import sessionmaker, scoped_session
+from models.models import Quote
 import os
 
-DATABASE_URL = os.environ["DATABASE_URL"]
-engine = Engine
-session = Session
+
+session_factory = Quote.build_engine()
 
 app = Flask(__name__)
 
 @app.route('/', methods=['GET'])
 def index():
-    model = Quote()
+    session = scoped_session(session_factory)
     quotes = session.query(Quote).all()
     return render_template('index.html', quotes=quotes)
 

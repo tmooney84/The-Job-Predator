@@ -50,5 +50,5 @@ def scrape():
     return results
 
 if __name__ == "__main__":
-    for quote in scrape():
-        print(quote)
+    scrape()
+
