@@ -1,6 +1,7 @@
 from models.models import Quote
 from confluent_kafka import Consumer
 import time
+import json
 
 def run_consumer():
     session_factory = Quote.build_engine()

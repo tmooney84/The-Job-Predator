@@ -15,13 +15,13 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Copy the models into the container
-COPY Confluent_Version/models /app/frontend/models
+COPY models /app/frontend/models
 
 # Copy the frontend app code
-COPY Confluent_Version/frontend/ /app/frontend
+COPY frontend/ /app/frontend
 
 # Copy requirements.txt into the container
-COPY Confluent_Version/frontend/requirements.txt . 
+COPY frontend/requirements.txt . 
 
 # Install dependencies
 RUN ls -l /app

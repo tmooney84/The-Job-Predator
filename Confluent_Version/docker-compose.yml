@@ -20,8 +20,8 @@ services:
 
   scraper_orchestrator:
     build:
-      context: ..
-      dockerfile: Confluent_Version/scraper_orchestrator/Dockerfile
+      context: .
+      dockerfile: scraper_orchestrator/Dockerfile
     container_name: scraper_orchestrator
     depends_on:
       kafka1:
@@ -32,12 +32,12 @@ services:
 
   consumer_service:
     build:
-      context: ..
-      dockerfile: Confluent_Version/consumer_service/Dockerfile
-    command: sh -c "sleep 30 && python3 consumer_service.py"
+      context: .
+      dockerfile: consumer_service/Dockerfile
     container_name: consumer_service
+    command: sh -c "sleep 30 && python3 consumer_service.py"
     environment:
-        - DATABASE_URL=mysql://dev:Qwasar_2025!@mysql:3306/quotes
+      - DATABASE_URL=mysql://dev:Qwasar_2025!@mysql:3306/quotes
     depends_on:
       - kafka1
       - mysql
@@ -46,8 +46,8 @@ services:
 
   frontend:
     build:
-      context: ..
-      dockerfile: Confluent_Version/frontend/Dockerfile
+      context: .
+      dockerfile: frontend/Dockerfile
     container_name: frontend
     ports:
       - "6300:6300"
@@ -75,7 +75,6 @@ services:
       - kafka_net
 
   kafka1:
-  
     image: confluentinc/cp-kafka:5.3.0
     hostname: kafka1
     ports:
@@ -100,8 +99,6 @@ services:
       retries: 5
 
   kafka2:
-    build:
-      context: ..
     image: confluentinc/cp-kafka:5.3.0
     hostname: kafka2
     ports:
@@ -126,8 +123,6 @@ services:
       retries: 5
 
   kafka3:
-    build:
-      context: ..
     image: confluentinc/cp-kafka:5.3.0
     hostname: kafka3
     ports:
@@ -162,15 +157,11 @@ services:
     networks:
       - kafka_net
 
-  
 volumes:
   zookeeper_data:
   zookeeper_datalog:
   mysql_data:
-  kafka1_data:
-  kafka2_data:
-  kafka3_data:
-
+ 
 networks:
   kafka_net:
     driver: bridge

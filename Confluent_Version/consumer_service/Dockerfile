@@ -11,12 +11,12 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Copy the app code
-COPY Confluent_Version/consumer_service/ /app/consumer_service
+COPY consumer_service/ /app/consumer_service
 
 # Copy the models into the container
-COPY Confluent_Version/models /app/consumer_service/models
+COPY models /app/consumer_service/models
 
-COPY Confluent_Version/consumer_service/requirements.txt .
+COPY consumer_service/requirements.txt .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
