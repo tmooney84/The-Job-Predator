@@ -1,66 +1,65 @@
-import schedule
-import time
 import json
 import socket
+import time
+import logging
 from confluent_kafka import Producer
-import subprocess
-import sys
+from concurrent.futures import ThreadPoolExecutor
+from scrapers import site1_scraper, site2_scraper  # import scraper modules
 
 class Publisher:
-    csv_scrapers = [
-        "scrapers/site1_scraper.py",
-        "scrapers/site2_scraper.py"
-    ]
-    conf = {
-        'acks': 'all',
-        'bootstrap.servers': 'kafka1:19091',
-        'client.id': socket.gethostname()
-    }
+    def __init__(self):
+        self.csv_scrapers = [site1_scraper, site2_scraper]
+        self.conf = {
+            'acks': 'all',
+            'bootstrap.servers': 'kafka1:19091',
+            'client.id': socket.gethostname()
+        }
+        self.producer = Producer(self.conf)
+        self.topic = "sql_queue"
 
-    producer = Producer(conf)
-    topic = "sql_queue"
+        # Logging setup
+        logging.basicConfig(filename="publisher_service.log", level=logging.INFO, format='%(asctime)s | %(message)s')
 
-    @staticmethod
-    def delivery_report(err, msg):
-        log_entry = ""
+    def delivery_report(self, err, msg):
         if err is not None:
-            log_entry = f"FAILED DELIVERY: {err}\n"
+            logging.error(f"FAILED DELIVERY: {err}")
         else:
-            log_entry = f"{time.ctime()} | Produced event to topic {msg.topic()}:\
-                partition = {msg.partition():12} \n \
-                value = {msg.value().decode('utf-8')}\
-                value = {json.loads(msg.value())}"
-        with open("publisher_service.log", "a") as log_file:
-            print('entered {} into db', log_entry)
-            log_file.write(log_entry)
+            decoded_value = msg.value().decode('utf-8')
+            logging.info(
+                f"Produced event to topic {msg.topic()}: partition={msg.partition()}, value={decoded_value}"
+            )
+
+    def run_scraper(self, scraper_module):
+        scraper_name = scraper_module.__name__
+        logging.info(f"Running scraper: {scraper_name}")
+
+        try:
+            results = scraper_module.scrape()
+            for item in results:
+                self.producer.produce(
+                    topic=self.topic,
+                    value=json.dumps(item),
+                    callback=self.delivery_report
+                )
+        except Exception as e:
+            error_msg = f"Error running scraper {scraper_name}: {e}"
+            logging.error(error_msg)
+            with open("scraper_errors.log", "a") as error_log:
+                error_log.write(f"{time.ctime()}: {error_msg}\n")
 
     def run_all_scrapers(self):
-        for scraper_script in self.csv_scrapers:
-            try:
-                print(f"Running scraper: {scraper_script}")
-                # Launch scraper as a separate process
-                result = subprocess.run([sys.executable, scraper_script], capture_output=True, text=True, check=True)
+        with ThreadPoolExecutor(max_workers=len(self.csv_scrapers)) as executor:
+            executor.map(self.run_scraper, self.csv_scrapers)
 
-                # Process the output
-                output_lines = result.stdout.strip().splitlines()
-                for line in output_lines:
-                    try:
-                        item = json.loads(line)
-                        self.producer.produce(topic=self.topic, value=json.dumps(item), callback=self.delivery_report)
-                    except json.JSONDecodeError:
-                        # Skip lines that aren't JSON (like print statements)
-                        continue
-
-            except subprocess.CalledProcessError as e:
-                print(f"Error running scraper {scraper_script}: {e}")
-                with open("scraper_errors.log", "a") as error_log:
-                    error_log.write(f"{time.ctime()}: Error running scraper {scraper_script}: {e}\n")
-
-        # Send 'done' message at the end
-        self.producer.produce(topic=self.topic, value=json.dumps({"type": "done"}), callback=self.delivery_report)
+        # Send 'done' message
+        self.producer.produce(
+            topic=self.topic,
+            value=json.dumps({"type": "done"}),
+            callback=self.delivery_report
+        )
         self.producer.flush()
 
 if __name__ == "__main__":
-    run_publisher = Publisher()
-    run_publisher.run_all_scrapers()
-    print('done!')
+    publisher = Publisher()
+    publisher.run_all_scrapers()
+    print("done!")
