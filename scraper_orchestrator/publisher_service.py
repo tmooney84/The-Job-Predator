@@ -48,6 +48,10 @@ class Publisher:
                 error_log.write(f"{time.ctime()}: {error_msg}\n")
 
     def run_all_scrapers(self):
+        # TODO: Test to see if dropping into subprocess is more efficient at
+        #       scale given the changes to the Selenium logic's UUIDs to be
+        #       unique;; if using ThreadPools need to limit to between 20-50
+        #       Python threads per batch to conserve cpu resources at scale
         with ThreadPoolExecutor(max_workers=len(self.csv_scrapers)) as executor:
             executor.map(self.run_scraper, self.csv_scrapers)
 
