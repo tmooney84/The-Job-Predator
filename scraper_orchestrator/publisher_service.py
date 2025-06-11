@@ -29,6 +29,21 @@ class Publisher:
                 f"Produced event to topic {msg.topic()}: partition={msg.partition()}, value={decoded_value}"
             )
 
+    ### TEMPORARY UNTIL TEST CONFIRMED ###
+    # def delivery_report(self, err, msg):
+    #     log_entry = ""
+    #     if err is not None:
+    #         log_entry = f"FAILED DELIVERY: {err}\n"
+    #     else:
+    #         log_entry = (
+    #             f"{time.ctime()} | Produced event to topic {msg.topic()}: "
+    #             f"partition = {msg.partition():<4} "
+    #             f"value = {msg.value()}\n"
+    #         )
+    
+    #     with open("publisher_service.log", "a") as log_file:
+    #         log_file.write(log_entry)
+
     def run_scraper(self, scraper_module):
         scraper_name = scraper_module.__name__
         logging.info(f"Running scraper: {scraper_name}")

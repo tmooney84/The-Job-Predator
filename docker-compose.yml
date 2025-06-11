@@ -26,6 +26,8 @@ services:
     depends_on:
       kafka1:
         condition: service_healthy
+    volumes:
+      - ./scraper_orchestrator/publisher_service.log:/app/scraper_orchestrator/publisher_service.log
     networks:
       - kafka_net
     command: sh -c "sleep 5 && python3 publisher_service.py"
@@ -41,6 +43,9 @@ services:
     depends_on:
       - kafka1
       - mysql
+    volumes:
+      - ./consumer_service/consumer_errors.log:/app/consumer_service/consumer_errors.log
+      - ./consumer_service/consumer_db_errors.log:/app/consumer_service/consumer_db_errors.log
     networks:
       - kafka_net
 
