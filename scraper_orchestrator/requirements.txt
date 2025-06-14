@@ -3,3 +3,4 @@ chromedriver
 confluent-kafka
 schedule
 selenium
+pandas

@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Quotes</title>
+    <title>Jobs</title>
 </head>
 <body>
-    <h1>Scraped Quotes</h1>
+    <h1>Scraped Jobs</h1>
     <ul>
-        {% for quote in quotes %}
-            <li>"{{ quote.text }}" - {{ quote.author }} [{{ quote.tags }}]</li>
+        {% for job in jobs %}
+            <li>"{{ job.title }}" - {{ job.url }} </li>
         {% endfor %}
     </ul>
 </body>

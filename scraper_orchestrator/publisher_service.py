@@ -4,22 +4,47 @@ import time
 import logging
 from confluent_kafka import Producer
 from concurrent.futures import ThreadPoolExecutor
-from queue import Queue
-from scrapers import site1_scraper, site2_scraper  # import scraper modules
+from scrapers import ibm_scraper
+
 
 class Publisher:
+    MAX_KAFKA_MSG_SIZE = 1000000  # 1 MB safe limit
+
     def __init__(self):
-        self.csv_scrapers = [site1_scraper, site2_scraper]
+        self.csv_scrapers = [ibm_scraper]
         self.conf = {
             'acks': 'all',
             'bootstrap.servers': 'kafka1:19091',
-            'client.id': socket.gethostname()
+            'client.id': socket.gethostname(),
+            'message.max.bytes': self.MAX_KAFKA_MSG_SIZE
         }
         self.producer = Producer(self.conf)
         self.topic = "sql_queue"
 
-        # Logging setup
-        logging.basicConfig(filename="publisher_service.log", level=logging.INFO, format='%(asctime)s | %(message)s')
+    def split_json_message(self, json_data, max_size):
+        if isinstance(json_data, str):
+            data = json.loads(json_data)
+        else:
+            data = json_data
+        if not isinstance(data, list):
+            data = [data]
+
+        chunks = []
+        current_chunk = []
+
+        for item in data:
+            current_chunk.append(item)
+            test_chunk = json.dumps(current_chunk)
+
+            if len(test_chunk.encode('utf-8')) > max_size:
+                current_chunk.pop()
+                chunks.append(json.dumps(current_chunk))
+                current_chunk = [item]
+
+        if current_chunk:
+            chunks.append(json.dumps(current_chunk))
+
+        return chunks
 
     def delivery_report(self, err, msg):
         if err is not None:
@@ -35,74 +60,35 @@ class Publisher:
         logging.info(f"Running scraper: {scraper_name}")
 
         try:
-            results = scraper_module.scrape()
-            for item in results:
+            raw_results = scraper_module.scrape()
+            chunks = self.split_json_message(raw_results, self.MAX_KAFKA_MSG_SIZE)
+
+            for chunk in chunks:
                 self.producer.produce(
                     topic=self.topic,
-                    value=json.dumps(item),
+                    value=chunk.encode("utf-8"),
                     callback=self.delivery_report
                 )
+                self.producer.poll(0)
+
         except Exception as e:
-            error_msg = f"Error running scraper {scraper_name}: {e}"
-            logging.error(error_msg)
-            with open("scraper_errors.log", "a") as error_log:
-                error_log.write(f"{time.ctime()}: {error_msg}\n")
-
-    # def run_all_scrapers(self):
-    #     # TODO: Test to see if dropping into subprocess is more efficient at
-    #     #       scale given the changes to the Selenium logic's UUIDs to be
-    #     #       unique;; if using ThreadPools need to limit to between 
-    #     #       ***3 - 10
-    #     #       threads at the same time is all we can handle for selenium
-    #     #       Python threads per batch to conserve cpu resources at scale
-        
-    #     with ThreadPoolExecutor(max_workers=len(self.csv_scrapers)) as executor:
-    #         executor.map(self.run_scraper, self.csv_scrapers)
-
-    #     # Send 'done' message
-    #     self.producer.produce(
-    #         topic=self.topic,
-    #         value=json.dumps({"type": "done"}),
-    #         callback=self.delivery_report
-    #     )
-    #     self.producer.flush()
-
-    def worker(self, scraper_queue):
-        while not scraper_queue.empty():
-            scraper = scraper_queue.get()
-            try:
-                self.run_scraper(scraper)
-            except Exception as e:
-                print(f"Scrape failed: {e}")
-            scraper_queue.task_done()
+            logging.exception(f"Error running scraper {scraper_name}: {e}")
 
     def run_all_scrapers(self):
-        # Limited the available threads to 5 because Selenium is a heavy process 
-        # that will be used by the majority of our scrapers. Each thread will 
-        # concurrently pull scrape jobs from a shared queue. When we have more computing 
-        # power can increase the number of threads to be run concurrently.
-
-        scraper_queue = Queue()
-
-        for scraper in self.csv_scrapers:
-            scraper_queue.put(scraper)
-
-        with ThreadPoolExecutor(max_workers= 5) as executor:
-            for _ in range(5):
-                executor.submit(self.worker, scraper_queue)
-
-        scraper_queue.join()
-
+        with ThreadPoolExecutor(max_workers=10) as executor:
+            executor.map(self.run_scraper, self.csv_scrapers)
+        #flush 1st!!
+        self.producer.flush()
         # Send 'done' message
         self.producer.produce(
             topic=self.topic,
-            value=json.dumps({"type": "done"}),
+            value=json.dumps({"type": "done"}).encode("utf-8"),
             callback=self.delivery_report
         )
-        self.producer.flush()
+        
+        logging.info("All scrapers finished.")
 
 
 if __name__ == "__main__":
     publisher = Publisher()
     publisher.run_all_scrapers()
-    print("done!")

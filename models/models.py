@@ -1,23 +1,42 @@
-from sqlalchemy import create_engine, Column, Integer, String
+from sqlalchemy import create_engine, Column, Integer, String, Text, Enum, CHAR
 from sqlalchemy.orm import declarative_base, sessionmaker, scoped_session
 import os
 # Define Base
 
 Base = declarative_base()
-class Quote(Base):
-    __tablename__ = 'quotes'
-    id = Column(Integer, primary_key=True)
-    text = Column(String(500))
-    author = Column(String(100))
-    tags = Column(String(200))
-    
+
+class Job(Base):
+    __tablename__ = 'jobs'
+
+    id = Column(CHAR(36), primary_key=True)
+    title = Column(String(255))
+    location = Column(Text)
+    description = Column(Text)
+    salary = Column(String(45))
+    posted_date = Column(String(45))
+    source = Column(String(45))
+    url = Column(String(255), nullable=False)
+    status = Column(Enum('Open', 'Closed', 'Unknown'), nullable=False)
+    internal_id = Column(String(255), nullable=False)
+    company_id = Column(CHAR(36), nullable=False)
+    job_category_id = Column(Integer, nullable=False)
+
     def to_dict(self):
         return {
-            'id' : self.id,
-            'text' : self.text,
-            'author' : self.author,
-            'tags' : self.tags
+            'id': self.id,
+            'title': self.title,
+            'location': self.location,
+            'description': self.description,
+            'salary': self.salary,
+            'posted_date': self.posted_date,
+            'source': self.source,
+            'url': self.url,
+            'status': self.status,
+            'internal_id': self.internal_id,
+            'company_id': self.company_id,
+            'job_category_id': self.job_category_id,
         }
+        
     @staticmethod
     def build_engine():
         DATABASE_URL = os.environ["DATABASE_URL"]
