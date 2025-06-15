@@ -56,6 +56,10 @@ class Publisher:
             )
 
     def run_scraper(self, scraper_module):
+        #TODO-implement threading.local() for thread local storage
+        # that will act as a buffer for potential left over chunks
+        # between functional calls for edge case
+         
         scraper_name = scraper_module.__name__
         logging.info(f"Running scraper: {scraper_name}")
 
