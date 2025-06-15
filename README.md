@@ -76,7 +76,7 @@ $ docker-compose up --build
 
 Access the frontend:
 
-Navigate to http://localhost:5000 to view the scraped information.
+Navigate to http://localhost:6300 to view the scraped information.
 
 ## Future Improvements
 - Build out Model Context Protocol Server, Prompting, Tools and Resources
