@@ -41,7 +41,7 @@ To run this website locally, follow these steps:
     $ docker-compose up --build
     ```
 
-4. Open `localhost5000` in your preferred web browser
+4. Open `localhost:6300` in your preferred web browser
 
 5. Enjoy!
 
