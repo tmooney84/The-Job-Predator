@@ -1,11 +1,11 @@
-from models.models import Quote
+from models.models import Job
 from confluent_kafka import Consumer
 import time
 import json
 from sqlalchemy.exc import SQLAlchemyError
 
 def run_consumer():
-    session_factory = Quote.build_engine()  # returns sessionmaker
+    session_factory = Job.build_engine()  # returns sessionmaker
 
     dbq_config = {
         'bootstrap.servers': 'kafka1:19091',
@@ -45,12 +45,12 @@ def run_consumer():
                 try:
                     # Use the session factory directly!
                     with session_factory() as session:
-                        quote = Quote(
+                        job = Job(
                             text=data['text'],
                             author=data['author'],
                             tags=",".join(data['tags'])
                         )
-                        session.add(quote)
+                        session.add(job)
                         session.commit()
                         print(f"✅ Consumed and inserted event: {data}")
                 
