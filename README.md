@@ -62,9 +62,9 @@ This website is designed for easy usage and access to information for making dec
 - **Kafka** 
 - **MySQL** 
 
-- **Caddy:** 
-- **Hashicorp Vault:** 
-- **Hashicorp Consul:** 
+- **Caddy** 
+- **Hashicorp Vault** 
+- **Hashicorp Consul** 
 
 Access the frontend:
 
