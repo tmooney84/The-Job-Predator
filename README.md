@@ -1,43 +1,106 @@
-# File Structure
+# The Job Searcher
 
-Confluent_Version/
-├── docker-compose.yml
-├── scraper_orchestrator/
-│   ├── Dockerfile
-│   ├── publisher_service.py
-│   ├── scrapers/
-│   │   └── site1_scraper.py
-│   └── requirements.txt
-├── consumer_service/
-│   ├── Dockerfile
-│   ├── consumer_main.py
-|    ├── consumer_service.py
-│   └── requirements.txt
-├── frontend/
-│   ├── Dockerfile
-│   ├── templates/
-│   │   └── index.html
-│   ├── app.py
-│   ├── models.py
-│   └── requirements.txt
-├── models/
-│   ├── __init__.py >>> I believe is needed to access this "package" in python(?)
-│   ├── models.py
-└── .env >>> temporarily on local machine until we have a secrets manager
-
-NOTE TO GABE: This is a toy app version of our dataflow using a quotes scraper. As of now the Kafka Containers and KAFDROP visualizer (for entering the topic names non-programatically) are up and running when spun up with Docker. The SQL DB container is up and running. I believe working as well. The consumer_service, scraper_orchestrator and frontend containers are not working correctly.
-
-The main sticking point for the consumer_service and scraper_orchestrator containers according to the logs seems to be the models.py. They need to be used by both the consumer_service for the ORM into the database and the frontend/app.py for mapping to the frontend. It seemed like the solution was to have the models in isolation and have a shared "address space" at app/. 
+Welcome to the The Job Searcher!
+-This is a Job Search Platform that acts to aggregate job listings from numerous companies and government organizations using scraping and API calls. It is being built with Python, Flask, Kafka, MySQL, Selenium, Docker and other technologies.
 
 
-# Execution
+## Table of Contents
 
-Build and start services:
+- [Installation](#installation)
+- [Usage](#usage)
+- [Features](#features)
+- [Technologies Used](#technologies-used)
+- [Future Improvements](#future-improvements)
+- [Contributing](#contributing)
+- [License](#license)
 
-```bash
-$ docker-compose up --build
-```
+## Installation
+
+To run this website locally, follow these steps:
+
+- Clone the repository:
+
+    using sh:
+    ```sh
+    git clone git@github.com:tmooney84/The-Job-Predator.git
+    ```
+
+    using https:
+    ```sh
+    git clone https://github.com/tmooney84/The-Job-Predator.git
+    ```
+
+2. Navigate to the project directory:
+    ```sh
+    cd The-Job-Predator/
+    ```
+
+3. Build and start services:
+
+    ```bash
+    $ docker-compose up --build
+    ```
+
+4. Open `localhost5000` in your preferred web browser
+
+5. Enjoy!
+
+## Usage
+
+This website is designed for easy usage and access to information for making decisions of where to go surfing. 
+
+## Features
+
+# Microservices Architecture
+![alt text for screen readers](/The_Job_Searcher_Architecture.jpg "The Job Searcher Architecture")
+
+## Technologies Used
+- **Python** 
+- **Flask**  
+- **Selenium**
+- **Beautifulsoup** 
+- **Kafka** 
+- **MySQL** 
+
+- **Caddy:** 
+- **Hashicorp Vault:** 
+- **Hashicorp Consul:** 
 
 Access the frontend:
 
-Navigate to http://localhost:5000 to view the scraped quotes.
+Navigate to http://localhost:6300 to view the scraped information.
+
+## Future Improvements
+- Build out Model Context Protocol Server, Prompting, Tools and Resources
+- Refine the job search functionality using prompting and MCP
+- Create an automated resume editor using MCP 
+
+
+## Contributing
+
+Contributions are welcome! Please follow these steps to contribute:
+
+1. Fork the repository.
+2. Create a new branch (`git checkout -b feature-branch`).
+3. Make your changes.
+4. Commit your changes (`git commit -m 'Add new feature'`).
+5. Push to the branch (`git push origin feature-branch`).
+6. Open a pull request.
+
+## License
+
+Copyright <YEAR> <COPYRIGHT HOLDER>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+---
+
+
+
+
+
