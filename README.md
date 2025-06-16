@@ -47,7 +47,7 @@ To run this website locally, follow these steps:
 
 ## Usage
 
-This website is designed for easy usage and access to information for making decisions of where to go surfing. 
+This webpage is designed to assist job seekers in finding positions that better suite their skills and interests. 
 
 ## Features
 
