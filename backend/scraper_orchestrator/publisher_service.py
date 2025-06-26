@@ -31,20 +31,22 @@ class Publisher:
 
         chunks = []
         current_chunk = []
-
+        # build chunk until it exceeds the max
         for item in data:
             current_chunk.append(item)
             test_chunk = json.dumps(current_chunk)
-
+            #when it does remove last item added, making it within parameters
             if len(test_chunk.encode('utf-8')) > max_size:
                 current_chunk.pop()
+                #add safe chunk to chuck list to be returned
                 chunks.append(json.dumps(current_chunk))
+                #add current chuck, which was the chunk that put the last good chunk over the max, to the current_chunk list
                 current_chunk = [item]
-
+        #add last chunk to the list(smallest chunk meaning no chance of hitting max)
         if current_chunk:
             chunks.append(json.dumps(current_chunk))
 
-        return chunks
+        return chunks #result is a list of safe chunks which we then publish, one at a time all of them being under the max
 
     def delivery_report(self, err, msg):
         if err is not None:
@@ -54,12 +56,9 @@ class Publisher:
             logging.info(
                 f"Produced event to topic {msg.topic()}: partition={msg.partition()}, value={decoded_value}"
             )
-
+            with open('publisher_service.txt', 'a') as file:
+                file.write(f"Produced event to topic {msg.topic()}: partition={msg.partition()}, value={decoded_value}")
     def run_scraper(self, scraper_module):
-        #TODO-implement threading.local() for thread local storage
-        # that will act as a buffer for potential left over chunks
-        # between functional calls for edge case
-         
         scraper_name = scraper_module.__name__
         logging.info(f"Running scraper: {scraper_name}")
 
